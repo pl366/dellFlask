@@ -2,7 +2,7 @@ from flask import Flask , request ,jsonify
 from watson_developer_cloud import ToneAnalyzerV3
 import simplejson as json
 from apscheduler.schedulers.background import BackgroundScheduler
-from Flask-PyMongo import PyMongo
+from flask_pymongo import PyMongo
 from sklearn.externals import joblib
 from bson.objectid import ObjectId
 
