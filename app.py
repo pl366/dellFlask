@@ -14,6 +14,7 @@ def ibm_score():
 	    username="27edc35f-d026-4dd3-930e-bac1f6fe10ef",
 	    password="FmEiqWUBJmDN"
 	    )
+	    return "IBM WATSON API RETURN REVIEW SENTIMENT"
 
 
 if __name__ == "__main__":
