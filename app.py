@@ -17,6 +17,8 @@ def ibm_score(**kwargs):
 
 
 
+	dataa = request.data
+
 	text = "FUCK YOU AND YOUR PRODUCT"
 
 	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
@@ -35,7 +37,7 @@ def ibm_score(**kwargs):
 		except:
 			break	
 
-	response = jsonify({'id': "123",'name': "Saatvik" })
+	response = jsonify({'id': "123",'name': str(s) ,'data' : dataa })
 
 	response.status_code = 200
 	
