@@ -1,6 +1,6 @@
 from flask import Flask
 from watson_developer_cloud import ToneAnalyzerV3
-import json
+import simplejson as json
 app = Flask(__name__)
 
 @app.route('/')
