@@ -36,10 +36,10 @@ def ibm_score(**kwargs):
 			break	
 
 	response = jsonify({'id': "123",'name': "Saatvik" })
-     
-    response.status_code = 200
 
-    return response		
+	response.status_code = 200
+	
+	return response		
 
 
 	# return str(s) , request.data 
