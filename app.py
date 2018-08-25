@@ -15,11 +15,13 @@ def ibm_score(**kwargs):
 	username="27edc35f-d026-4dd3-930e-bac1f6fe10ef",
 	password="FmEiqWUBJmDN")
 
-	data2 = request.args 
+	data = request.args 
 
-	data1 = data2['text'] 
+	reviewCount = int(data['reviewCount'])
 
-	text = data1
+	prevReviewScore = int(data['prevReviewScore'])
+
+	text = data['reviewText'] 
 
 	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
 	j = json.dumps(tone_analysis, indent=2)
@@ -30,14 +32,21 @@ def ibm_score(**kwargs):
 
 	i = 0
 	s = 0
+	count = 0
 	while True:
 		try:
 			s+=(intent[d["document_tone"]["tones"][i]["tone_name"]])*(d["document_tone"]["tones"][i]["score"])
 			i+=1
+			count+=1
 		except:
+			if (count!=0):
+				s= s/count
+			count = 0	
 			break	
 
-	response = jsonify({'score': str(s)})
+	finalScore = (s*(reviewCount+1) + prevReviewScore*reviewCount )/(reviewCount * 2 + 1)  
+
+	response = jsonify({'score': str(finalScore)})
 
 	response.status_code = 200
 	
