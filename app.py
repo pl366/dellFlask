@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask , request
 from watson_developer_cloud import ToneAnalyzerV3
 import simplejson as json
 app = Flask(__name__)
