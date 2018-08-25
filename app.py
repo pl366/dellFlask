@@ -1,4 +1,4 @@
-from flask import Flask , request
+from flask import Flask , request ,jsonify
 from watson_developer_cloud import ToneAnalyzerV3
 import simplejson as json
 app = Flask(__name__)
@@ -35,7 +35,14 @@ def ibm_score(**kwargs):
 		except:
 			break	
 
-	return str(s) , request.data 
+	response = jsonify({'id': "123",'name': "Saatvik" })
+     
+    response.status_code = 200
+
+    return response		
+
+
+	# return str(s) , request.data 
 
 if __name__ == "__main__":
 	app.run()
