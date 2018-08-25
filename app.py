@@ -9,13 +9,15 @@ def hello_world():
 
 
 @app.route('/ibm')
-def ibm_score():
+def ibm_score(**kwargs):
 	tone_analyzer = ToneAnalyzerV3(
 	version='2017-09-21',
 	username="27edc35f-d026-4dd3-930e-bac1f6fe10ef",
 	password="FmEiqWUBJmDN")
 
-	text = "Fuck your Product"
+
+
+	text = "FUCK YOU AND YOUR PRODUCT"
 
 	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
 	j = json.dumps(tone_analysis, indent=2)
@@ -33,8 +35,7 @@ def ibm_score():
 		except:
 			break	
 
-	print (s)	
-	return s 
+	return str(s) , request.data 
 
 if __name__ == "__main__":
 	app.run()
