@@ -15,11 +15,11 @@ def ibm_score(**kwargs):
 	username="27edc35f-d026-4dd3-930e-bac1f6fe10ef",
 	password="FmEiqWUBJmDN")
 
+	data2 = request.args 
 
+	data1 = data2['text'] 
 
-	dataa = request.data
-
-	text = "FUCK YOU AND YOUR PRODUCT"
+	text = data1
 
 	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
 	j = json.dumps(tone_analysis, indent=2)
@@ -37,14 +37,11 @@ def ibm_score(**kwargs):
 		except:
 			break	
 
-	response = jsonify({'id': "123",'name': str(s) ,'data' : dataa })
+	response = jsonify({'score': str(s)})
 
 	response.status_code = 200
 	
 	return response		
-
-
-	# return str(s) , request.data 
 
 if __name__ == "__main__":
 	app.run()
