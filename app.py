@@ -79,7 +79,7 @@ def ibm_score(**kwargs):
 
 	reviewCount = int(data['reviewCount'])
 
-	prevReviewScore = int(data['prevReviewScore'])
+	prevReviewScore = float(data['prevReviewScore'])
 
 	text = data['reviewText'] 
 
