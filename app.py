@@ -23,43 +23,43 @@ mongo = PyMongo(app)
 
 clf = joblib.load('trained.pkl') 
 clf2 = joblib.load('trained2.pkl') 
-# def sense():
-# 	print("Scheduler is alive!")
+def sense():
+	print("Scheduler is alive!")
 
-# 	mycol = mongo.db.customermls
-# 	# print (mycol ,"mycol")
-# 	# myquery = { "isAltered": "true" }
+	mycol = mongo.db.customermls
+	# print (mycol ,"mycol")
+	# myquery = { "isAltered": "true" }
 
-# 	mydoc = mycol.find({})
-# 	# print (mydoc,"<-mydoc")
+	mydoc = mycol.find({})
+	# print (mydoc,"<-mydoc")
 
-# 	sentimentParams = []
+	sentimentParams = []
 
-# 	for document in mydoc:
-# 		if document['isAltered']:
-# 			sentimentParams.append([document["c1"],document["c2"],document["c3"],document["p1"],document["p2"],document["p3"],document["reviewSentiment"],document["serviceFeedbackSentiment"]])
+	for document in mydoc:
+		if document['isAltered']:
+			sentimentParams.append([document["c1"],document["c2"],document["c3"],document["p1"],document["p2"],document["p3"],document["reviewSentiment"],document["serviceFeedbackSentiment"]])
 			
 
-# 	l = clf.predict(sentimentParams)
+	l = clf.predict(sentimentParams)
 
-# 	i =0 
-# 	myd = mycol.find({})
-# 	# print(sentimentParams)
-# 	for docu in myd:
-# 		if docu['isAltered']:
-# 			criteria = docu['_id']
-# 			mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
-# 			i+=1
-# 			print ("\nRecords updated successfully\n") 
+	i =0 
+	myd = mycol.find({})
+	# print(sentimentParams)
+	for docu in myd:
+		if docu['isAltered']:
+			criteria = docu['_id']
+			mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
+			i+=1
+			print ("\nRecords updated successfully\n") 
 		
-# 	print (l)	
+	print (l)	
 
 
-# 	return str(l)
+	return str(l)
 
-# sched = BackgroundScheduler(daemon=True)
-# sched.add_job(sense,'interval',minutes=1)
-# sched.start()
+sched = BackgroundScheduler(daemon=True)
+sched.add_job(sense,'interval',minutes=1)
+sched.start()
 
 @app.route('/')
 @cross_origin()
@@ -234,5 +234,9 @@ def survey(**kwargs):
 
 if __name__ == "__main__":
 	app.run()
+<<<<<<< HEAD
 
  
+=======
+ 
+>>>>>>> 7cc47349ce681dbcd9e54d5431f3696380ead655
