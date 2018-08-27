@@ -240,9 +240,10 @@ def survey(**kwargs):
 @app.route('/complaintsX',methods=['GET'])
 @cross_origin()
 def complaintAverage(**kwargs):
-	sample = [['22-08-2018' , '13'] ,['24-08-2018' , '8'] ]
-
-	response = jsonify({'list': str(sample)})
+	#sample = [['22-08-2018','13'] ,['24-08-2018' , '8']]
+	sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
+	# response = jsonify({"data":str(sample)})
+	response = jsonify(sample) 
 	response.status_code = 200
 
 	print(sample)
