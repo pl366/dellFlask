@@ -234,9 +234,3 @@ def survey(**kwargs):
 
 if __name__ == "__main__":
 	app.run()
-<<<<<<< HEAD
-
- 
-=======
- 
->>>>>>> 7cc47349ce681dbcd9e54d5431f3696380ead655
