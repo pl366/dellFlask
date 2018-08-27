@@ -376,6 +376,55 @@ def sentimentAverage(**kwargs):
 	return response
 
 
+@app.route('/productViewed',methods=['GET'])
+@cross_origin()
+def productViewed(**kwargs):
+	k = [] 
+	j={}
+	mycol5 = mongo.db.customermls
+	mydoc5 = mycol5.find({})
+
+	j["l1"] = 0
+	j["l2"] = 0
+	j["l3"] = 0
+	
+	for x in mydoc5:
+		j["l1"]+=x['c1']
+		j["l2"]+=x['c2']
+		j["l3"]+=x['c3']
+
+	k.append(j)	
+	response = jsonify(k) 
+	response.status_code = 200
+
+	print(k ,"K is ")
+
+	return response
+
+@app.route('/productBought',methods=['GET'])
+@cross_origin()
+def productBought(**kwargs):
+	k = [] 
+	j={}
+	mycol5 = mongo.db.customermls
+	mydoc5 = mycol5.find({})
+
+	j["l1"] = 0
+	j["l2"] = 0
+	j["l3"] = 0
+	
+	for x in mydoc5:
+		j["l1"]+=x['p1']
+		j["l2"]+=x['p2']
+		j["l3"]+=x['p3']
+
+	k.append(j)	
+	response = jsonify(k) 
+	response.status_code = 200
+
+	print(k ,"K is ")
+
+	return response	
 
 if __name__ == "__main__":
 	app.run()
