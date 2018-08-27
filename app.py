@@ -234,7 +234,24 @@ def survey(**kwargs):
 		# 		print ("oihoihihohoh")
 		# 		# mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
 		mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
-	return ("\nRecords updated successfully\n")   	
+	return ("\nRecords updated successfully\n")   
+
+
+@app.route('/complaintsX',methods=['GET'])
+@cross_origin()
+def complaintAverage(**kwargs):
+	sample = [['22-08-2018' , '13'] ,['24-08-2018' , '8'] ]
+
+	response = jsonify({'list': str(sample)})
+	response.status_code = 200
+
+	print(sample)
+
+	return response
+
+
+
+
 
 if __name__ == "__main__":
 	app.run()
