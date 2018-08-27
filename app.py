@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask_pymongo import PyMongo
 from sklearn.externals import joblib
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime,date
 from flask_cors import CORS, cross_origin
 
 
@@ -61,11 +61,43 @@ sched = BackgroundScheduler(daemon=True)
 sched.add_job(sense,'interval',minutes=1)
 sched.start()
 
+
+def sense2():
+	print("Scheduler2 is alive!")
+
+	mycol7 = mongo.db.customermls
+	# print (mycol ,"mycol")
+	# myquery = { "isAltered": "true" }
+
+	mydoc7 = mycol7.find({})
+	# print (mydoc,"<-mydoc")
+	s1 = 0
+	s2 = 0
+	s3 = 0
+	c = 0
+	for document in mydoc7:
+		c+=1
+		s1+=(document["reviewSentiment"])
+		s2+=(document["serviceFeedbackSentiment"])
+		s3+=(document["finalSentiment"])
+	p1 = round(s1/c,2)
+	p2 = round(s2/c,2)
+	p3 = round(s3/c,2)	
+	post = {"averageComplaintSentiment":p2 ,"averageReview":p1,"averageSentiment":p3 ,"date": datetime.now()}
+	posts = mongo.db.sentiments
+	posts.insert_one(post)
+	return "saatvik and pulkit here , hello "
+
+sched = BackgroundScheduler(daemon=True)
+sched.add_job(sense2,'interval',hours=24)
+sched.start()
+
+
+
 @app.route('/')
 @cross_origin()
 def hello_world():
 	return "Saatvik pulkit are best "
-
 
 @app.route('/ibm')
 @cross_origin()
@@ -149,7 +181,6 @@ def survey(**kwargs):
 
 	if request.method == 'POST':
 		# print(data['username']) 
-		print("WTFF")
 		print(request.form["username"])
 		data = request.form 
 
@@ -161,7 +192,7 @@ def survey(**kwargs):
 		q3=int(data['demeanour of the customer service employee'])
 		q4=int(data['employee to be very well informed'])
 		q5=int(data['wait for my query acceptable'] )
-		te = data['Feedback'] 
+		te=data['Feedback'] 
 
 		print(q1,q2,q3,q4,q5,te)
 
@@ -241,16 +272,108 @@ def survey(**kwargs):
 @cross_origin()
 def complaintAverage(**kwargs):
 	#sample = [['22-08-2018','13'] ,['24-08-2018' , '8']]
-	sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
+
+	# todo : score from db is an average , compute average first . this has to be done in the schedular .
+	#schedular : computes average evrynight  and  puts it in the required collection , can be done in one collection . 
+	# k = [] 
+	# j = {} 
+	# while :
+
+	# 	j[date] = output of db 
+	# 	j[score] = score from db 
+	# 	k.append(j)
+
+	k = [] 
+	
+	mycol4 = mongo.db.sentiments
+	mydoc4 = mycol4.find({})
+
+
+	i=0 
+
+	for x in mongo.db.sentiments.find({}).sort('date',-1):
+		j = {} 
+		print(x)
+		print(x['date'])
+		if i>6:
+			break
+		j["date"] = x['date']
+		j["score"] = x['averageComplaintSentiment']
+		k.append(j) 
+		i+=1
+
+
+
+
+	# sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
 	# response = jsonify({"data":str(sample)})
-	response = jsonify(sample) 
+	response = jsonify(k) 
 	response.status_code = 200
 
-	print(sample)
+	print(k ,"K is ")
 
 	return response
 
+@app.route('/reviewX',methods=['GET'])
+@cross_origin()
+def reviewAverage(**kwargs):
 
+	k = [] 
+	j = {} 
+
+	i=0 
+
+	for x in mongo.db.sentiments.find({}).sort('date',-1):
+		j = {} 
+		if i>6:
+			break
+		j["date"] = x['date']
+		j["score"] = x['averageReview']
+		k.append(j)
+		i+=1 
+
+
+
+		
+	# sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
+	# response = jsonify({"data":str(sample)})
+	response = jsonify(k) 
+	response.status_code = 200
+
+
+	return response
+
+@app.route('/sentimentX',methods=['GET'])
+@cross_origin()
+def sentimentAverage(**kwargs):
+
+	k = [] 
+	mycol6 = mongo.db.sentiments
+	mydoc6 = mycol6.find({})
+
+	i=0 
+
+
+
+	for x in mongo.db.sentiments.find({}).sort('date',-1):
+		j = {} 
+		if i>6:
+			break
+		j["date"] = x['date']
+		j["score"] = x['averageSentiment']
+		k.append(j)
+		i+=1  
+
+
+
+		
+# 	# sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
+# 	# response = jsonify({"data":str(sample)})
+	response = jsonify(k) 
+	response.status_code = 200
+
+	
+	return response
 
 
 
