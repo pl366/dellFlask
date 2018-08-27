@@ -141,95 +141,99 @@ def complaints_priority(**kwargs):
 	return response	
 
 
-@app.route('/customerSurvey')
+@app.route('/customerSurvey',methods=['POST','GET'])
 @cross_origin()
 def survey(**kwargs):
+	if request.method == 'GET':
+		return "send post request only yours truly - pulkit and saatvik"
 
-	# if request.method == 'GET':
+	if request.method == 'POST':
 		# print(data['username']) 
-		# print("WTFF")
-		# print(data['demeanour of the customer service employee'])
-	data = request.args 
+		print("WTFF")
+		print(request.form["username"])
+		data = request.form 
 
-	print(data['username'])
-	q1=int(data['level of services you received'])
+		print(data['username'])
+		q1=int(data['level of services you received'])
 
-	print(q1)
-	q2=int(data['satisfied with how your problem was dealt'])
-	q3=int(data['demeanour of the customer service employee'])
-	q4=int(data['employee to be very well informed'])
-	q5=int(data['wait for my query acceptable'] )
-	te = data['Feedback'] 
+		print(q1)
+		q2=int(data['satisfied with how your problem was dealt'])
+		q3=int(data['demeanour of the customer service employee'])
+		q4=int(data['employee to be very well informed'])
+		q5=int(data['wait for my query acceptable'] )
+		te = data['Feedback'] 
 
-	print(q1,q2,q3,q4,q5,te)
+		print(q1,q2,q3,q4,q5,te)
 
-	tone_analyzer = ToneAnalyzerV3(
-	version='2017-09-21',
-	username="27edc35f-d026-4dd3-930e-bac1f6fe10ef",
-	password="FmEiqWUBJmDN")
+		tone_analyzer = ToneAnalyzerV3(
+		version='2017-09-21',
+		username="27edc35f-d026-4dd3-930e-bac1f6fe10ef",
+		password="FmEiqWUBJmDN")
 
-	print("before printing text" )
-	print(data['Feedback'], "<- text")
+		print("before printing text" )
+		print(data['Feedback'], "<- text")
 
-	text = data['Feedback']
+		text = data['Feedback']
 
-	print(text) 
+		print(text) 
 
-	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
-	j = json.dumps(tone_analysis, indent=2)
-	d = json.loads(j)
-	print (d)
+		tone_analysis = tone_analyzer.tone({'text': text},'application/json')
+		j = json.dumps(tone_analysis, indent=2)
+		d = json.loads(j)
+		print (d)
 
-	intent = {"Anger":2,"Joy":5,"Sadness":3,"Fear":4,"Confident":3,"Tentative":1,"Analytical":2}
+		intent = {"Anger":2,"Joy":5,"Sadness":3,"Fear":4,"Confident":3,"Tentative":1,"Analytical":2}
 
-	i = 0
-	s = 0
-	count = 0
-	while True:
-		try:
-			s+=(intent[d["document_tone"]["tones"][i]["tone_name"]])*(d["document_tone"]["tones"][i]["score"])
-			i+=1
-			count+=1
-		except:
-			if (count!=0):
-				s=s/count
-			count = 0	
-			break	
+		i = 0
+		s = 0
+		count = 0
+		while True:
+			try:
+				s+=(intent[d["document_tone"]["tones"][i]["tone_name"]])*(d["document_tone"]["tones"][i]["score"])
+				i+=1
+				count+=1
+			except:
+				if (count!=0):
+					s=s/count
+				count = 0	
+				break	
 
-	print(s) 
+		print(s) 
 
-	#todo 1. Machine learning : predict the score given q1 , q2 .. q6
+		#todo 1. Machine learning : predict the score given q1 , q2 .. q6
 
-	s = clf2.predict([[q1,q2,q3,q4,q5,s]])
+		s = clf2.predict([[q1,q2,q3,q4,q5,s]])
 
-	#todo 2 . Use pymongo and update in db using username as key 
+		#todo 2 . Use pymongo and update in db using username as key 
 
-	mycol3 = mongo.db.customermls
-	mydoc3 = mycol3.find({})
-	print(mydoc3)
-	username = data['username']
-	# username = "saatvik"
-	print(username)
-	# for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
-	print (mongo.db.customermls.find({"username":{"$in": [username]}}),"uogogg")
-	
-	for x in mongo.db.customermls.find({"username":{"$in": [username]}}):
-		print(x)
-		prevCount = x['feedbackCount']
-		prevScore = x['serviceFeedbackSentiment']
-
-
-	finalSen = float((s*(prevCount+1) + prevScore * prevCount) /(2*prevCount + 1 ) )
-	newCount = prevCount + 1
+		mycol3 = mongo.db.customermls
+		mydoc3 = mycol3.find({})
+		print(mydoc3)
+		username = str(data['username'])
+		username = str(username.encode("ascii"))
+		# print(type (userstring))
+		# # username = "saatvik"
+		# print(userstring)
+		# for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
+		print (mongo.db.customermls.find({"username":{"$in": [username]}}),"uogogg")
+		
+		for x in mongo.db.customermls.find({"username":{"$in":[username]}}):
+			print(x)
+			prevCount = x['feedbackCount']
+			prevScore = x['serviceFeedbackSentiment']
 
 
-	print (finalSen)
+		finalSen = float((s*(prevCount+1) + prevScore * prevCount) /(2*prevCount + 1 ) )
+		newCount = prevCount + 1
 
-	# for doc in mydoc3 :
-	# 	if doc['username'] == username :
-	# 		print ("oihoihihohoh")
-	# 		# mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
-	mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
+
+		print (finalSen)
+
+		# for doc in mydoc3 :
+		# 	if doc['username'] == username :
+		# 		print ("oihoihihohoh")
+		# 		# mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
+		mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
 	return ("\nRecords updated successfully\n")   	
 
 if __name__ == "__main__":
