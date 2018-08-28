@@ -161,6 +161,7 @@ def complaints_priority(**kwargs):
 			p = int(((now - m).total_seconds())//86400)
 			print(mongo.db.customermls.find({"username":{"$in": [d['username']]}}))
 			for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
+				print(post['username'])
 				l.append([cid,(post['finalSentiment']+p*0.2)])
 
 	print (l)				
