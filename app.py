@@ -37,6 +37,15 @@ def sense():
 
 	for document in mydoc:
 		if document['isAltered']:
+			if document['reviewSentiment'] is None:
+				for x in mongo.db.sentiments.find({}).sort('date',-1):
+					docuement['reviewSentiment'] = x['reviewSentiment']
+					break  
+			if document['serviceFeedbackSentiment'] is None: 
+				for x in mongo.db.sentiments.find({}).sort('date',-1):
+					document['reviewSentiment'] = x['averageComplaintSentiment']
+					break 
+
 			sentimentParams.append([document["c1"],document["c2"],document["c3"],document["p1"],document["p2"],document["p3"],document["reviewSentiment"],document["serviceFeedbackSentiment"]])
 			
 
@@ -100,6 +109,9 @@ def hello_world():
 	return "Saatvik pulkit are best "
 
 @app.route('/ibm')
+# @cross_origin()
+# def ibm_score(**kwargs):
+# 	@app.route('/ibm')
 @cross_origin()
 def ibm_score(**kwargs):
 	tone_analyzer = ToneAnalyzerV3(
@@ -111,8 +123,11 @@ def ibm_score(**kwargs):
 
 	reviewCount = int(data['reviewCount'])
 
-	prevReviewScore = float(data['prevReviewScore'])
-
+	
+	try :
+		prevReviewScore = float(data['prevReviewScore'])
+	except :
+		prevReviewScore = 0 
 	text = data['reviewText'] 
 
 	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
@@ -120,7 +135,7 @@ def ibm_score(**kwargs):
 	d = json.loads(j)
 	print (d)
 
-	intent = {"Anger":2,"Joy":5,"Sadness":3,"Fear":4,"Confident":3,"Tentative":1,"Analytical":2}
+	intent = {"Anger":2,"Joy":5,"Sadness":3,"Fear":3,"Confident":4,"Tentative":2,"Analytical":3}
 
 	i = 0
 	s = 0
@@ -213,7 +228,7 @@ def survey(**kwargs):
 		d = json.loads(j)
 		print (d)
 
-		intent = {"Anger":2,"Joy":5,"Sadness":3,"Fear":4,"Confident":3,"Tentative":1,"Analytical":2}
+		intent = {"Anger":2,"Joy":5,"Sadness":3,"Fear":3,"Confident":4,"Tentative":2,"Analytical":3}
 
 		i = 0
 		s = 0
@@ -379,21 +394,17 @@ def sentimentAverage(**kwargs):
 @app.route('/productViewed',methods=['GET'])
 @cross_origin()
 def productViewed(**kwargs):
-	k = [] 
-	j={}
 	mycol5 = mongo.db.customermls
 	mydoc5 = mycol5.find({})
-
-	j["l1"] = 0
-	j["l2"] = 0
-	j["l3"] = 0
-	
+	l1 = 0
+	l2 = 0
+	l3 = 0
 	for x in mydoc5:
-		j["l1"]+=x['c1']
-		j["l2"]+=x['c2']
-		j["l3"]+=x['c3']
+		l1+=x['c1']
+		l2+=x['c2']
+		l3+=x['c3']
+	k = [{"l1":l1},{"l1":l2},{"l1":l3}]
 
-	k.append(j)	
 	response = jsonify(k) 
 	response.status_code = 200
 
@@ -404,21 +415,19 @@ def productViewed(**kwargs):
 @app.route('/productBought',methods=['GET'])
 @cross_origin()
 def productBought(**kwargs):
-	k = [] 
-	j={}
 	mycol5 = mongo.db.customermls
 	mydoc5 = mycol5.find({})
 
-	j["l1"] = 0
-	j["l2"] = 0
-	j["l3"] = 0
+	l1 = 0
+	l2 = 0
+	l3 = 0
 	
 	for x in mydoc5:
-		j["l1"]+=x['p1']
-		j["l2"]+=x['p2']
-		j["l3"]+=x['p3']
+		l1+=x['p1']
+		l2+=x['p2']
+		l3+=x['p3']
 
-	k.append(j)	
+	k = [{"l1":l1},{"l1":l2},{"l1":l3}]
 	response = jsonify(k) 
 	response.status_code = 200
 
