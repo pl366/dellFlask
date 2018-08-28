@@ -27,42 +27,34 @@ def sense():
 	print("Scheduler is alive!")
 
 	mycol = mongo.db.customermls
-	# print (mycol ,"mycol")
-	# myquery = { "isAltered": "true" }
 
 	mydoc = mycol.find({})
-	# print (mydoc,"<-mydoc")
-
 	sentimentParams = []
 
 	for document in mydoc:
 		if document['isAltered']:
 			if document['reviewSentiment'] is None:
 				for x in mongo.db.sentiments.find({}).sort('date',-1):
-					docuement['reviewSentiment'] = x['reviewSentiment']
-					break  
+					document['reviewSentiment'] = x['averageSentiment'] 
+					break 
+
 			if document['serviceFeedbackSentiment'] is None: 
-				for x in mongo.db.sentiments.find({}).sort('date',-1):
-					document['reviewSentiment'] = x['averageComplaintSentiment']
+				for y in mongo.db.sentiments.find({}).sort('date',-1):
+					document['serviceFeedbackSentiment'] = y['averageComplaintSentiment']
 					break 
 
 			sentimentParams.append([document["c1"],document["c2"],document["c3"],document["p1"],document["p2"],document["p3"],document["reviewSentiment"],document["serviceFeedbackSentiment"]])
-			
 
 	l = clf.predict(sentimentParams)
 
 	i =0 
 	myd = mycol.find({})
-	# print(sentimentParams)
 	for docu in myd:
 		if docu['isAltered']:
 			criteria = docu['_id']
 			mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
 			i+=1
 			print ("\nRecords updated successfully\n") 
-		
-	print (l)	
-
 
 	return str(l)
 
@@ -70,16 +62,13 @@ sched = BackgroundScheduler(daemon=True)
 sched.add_job(sense,'interval',minutes=1)
 sched.start()
 
-
 def sense2():
 	print("Scheduler2 is alive!")
 
 	mycol7 = mongo.db.customermls
-	# print (mycol ,"mycol")
-	# myquery = { "isAltered": "true" }
 
 	mydoc7 = mycol7.find({})
-	# print (mydoc,"<-mydoc")
+
 	s1 = 0
 	s2 = 0
 	s3 = 0
@@ -109,9 +98,6 @@ def hello_world():
 	return "Saatvik pulkit are best "
 
 @app.route('/ibm')
-# @cross_origin()
-# def ibm_score(**kwargs):
-# 	@app.route('/ibm')
 @cross_origin()
 def ibm_score(**kwargs):
 	tone_analyzer = ToneAnalyzerV3(
@@ -128,6 +114,7 @@ def ibm_score(**kwargs):
 		prevReviewScore = float(data['prevReviewScore'])
 	except :
 		prevReviewScore = 0 
+		print("null value handled well ")
 	text = data['reviewText'] 
 
 	tone_analysis = tone_analyzer.tone({'text': text},'application/json')
@@ -171,9 +158,6 @@ def complaints_priority(**kwargs):
 			m = d['issuedAt']
 			print (d['username'])
 			cid = d['complaintId']
-			# print (m)
-			# print (type(m))
-			# print (now)
 			p = int(((now - m).total_seconds())//86400)
 			print(mongo.db.customermls.find({"username":{"$in": [d['username']]}}))
 			for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
@@ -246,39 +230,27 @@ def survey(**kwargs):
 
 		print(s) 
 
-		#todo 1. Machine learning : predict the score given q1 , q2 .. q6
-
 		s = clf2.predict([[q1,q2,q3,q4,q5,s]])
-
-		#todo 2 . Use pymongo and update in db using username as key 
-
 		mycol3 = mongo.db.customermls
 		mydoc3 = mycol3.find({})
 		print(mydoc3)
 		username = str(data['username'])
 		username = str(username.encode("ascii"))
-		# print(type (userstring))
-		# # username = "saatvik"
-		# print(userstring)
-		# for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
 		print (mongo.db.customermls.find({"username":{"$in": [username]}}),"uogogg")
 		
 		for x in mongo.db.customermls.find({"username":{"$in":[username]}}):
 			print(x)
-			prevCount = x['feedbackCount']
-			prevScore = x['serviceFeedbackSentiment']
-
-
+			prevCount = int(x['feedbackCount'])
+			try :
+				prevScore = float(x['serviceFeedbackSentiment'])
+			except :
+				prevScore = 0 
+	
 		finalSen = float((s*(prevCount+1) + prevScore * prevCount) /(2*prevCount + 1 ) )
 		newCount = prevCount + 1
 
 
 		print (finalSen)
-
-		# for doc in mydoc3 :
-		# 	if doc['username'] == username :
-		# 		print ("oihoihihohoh")
-		# 		# mongo.db.customermls.update_one({'_id': ObjectId(criteria)},{"$set": {"finalSentiment":l[i] ,"isAltered" : False }})
 		mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
 	return ("\nRecords updated successfully\n")   
 
@@ -286,20 +258,7 @@ def survey(**kwargs):
 @app.route('/complaintsX',methods=['GET'])
 @cross_origin()
 def complaintAverage(**kwargs):
-	#sample = [['22-08-2018','13'] ,['24-08-2018' , '8']]
-
-	# todo : score from db is an average , compute average first . this has to be done in the schedular .
-	#schedular : computes average evrynight  and  puts it in the required collection , can be done in one collection . 
-	# k = [] 
-	# j = {} 
-	# while :
-
-	# 	j[date] = output of db 
-	# 	j[score] = score from db 
-	# 	k.append(j)
-
 	k = [] 
-	
 	mycol4 = mongo.db.sentiments
 	mydoc4 = mycol4.find({})
 
@@ -317,11 +276,6 @@ def complaintAverage(**kwargs):
 		k.append(j) 
 		i+=1
 
-
-
-
-	# sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
-	# response = jsonify({"data":str(sample)})
 	response = jsonify(k) 
 	response.status_code = 200
 
@@ -346,12 +300,6 @@ def reviewAverage(**kwargs):
 		j["score"] = x['averageReview']
 		k.append(j)
 		i+=1 
-
-
-
-		
-	# sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
-	# response = jsonify({"data":str(sample)})
 	response = jsonify(k) 
 	response.status_code = 200
 
@@ -379,11 +327,6 @@ def sentimentAverage(**kwargs):
 		k.append(j)
 		i+=1  
 
-
-
-		
-# 	# sample = [{"date":"22-08-2018" , "score" : "3.8"},{"date":"22-08-2018" , "score" : "3.8"}]
-# 	# response = jsonify({"data":str(sample)})
 	response = jsonify(k) 
 	response.status_code = 200
 
