@@ -251,9 +251,14 @@ def survey(**kwargs):
 		newCount = prevCount + 1
 
 
-		print (finalSen)
-		mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
-	return ("\nRecords updated successfully\n")   
+		l = [finalSen,username]
+		response = jsonify({'list': str(l)})
+		response.status_code = 200
+	
+		return response	
+
+	# 	mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
+	# return ("\nRecords updated successfully\n")   
 
 
 @app.route('/complaintsX',methods=['GET'])
