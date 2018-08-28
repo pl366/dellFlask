@@ -251,8 +251,8 @@ def survey(**kwargs):
 		newCount = prevCount + 1
 
 
-		l = [finalSen,username]
-		response = jsonify({'list': str(l)})
+		
+		response = jsonify({'score': finalSen})
 		response.status_code = 200
 	
 		return response	
