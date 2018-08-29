@@ -131,7 +131,7 @@ def sense3():
 				criteria = currentValue['_id']
 
 				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"low":{"c1":str(c1) , "c2":str(c2) , "c3" :str(c3) }}})
- 
+ 				mongo.db.complaints.update_one({'username': document['username']},{"$set": {"isCounted":False}})
 
 			elif post['finalSentiment'] > 3.0 and post['finalSentiment'] < 4.0: 
 				print("final sentiment is less than 4 > 3 ")
@@ -153,7 +153,7 @@ def sense3():
 
 
 				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"medium":{"c1":str(c1) , "c2":str(c2) , "c3" :str(c3) }}})
- 
+ 				mongo.db.complaints.update_one({'username': document['username']},{"$set": {"isCounted":False}})
 
 
 			else:
@@ -177,7 +177,7 @@ def sense3():
 	
 
 				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"high":{"c1":str(c1) , "c2":str(c2) , "c3" :str(c3) }}})
-
+				mongo.db.complaints.update_one({'username': document['username']},{"$set": {"isCounted":False}})
 
 
 
