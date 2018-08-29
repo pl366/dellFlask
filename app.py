@@ -1,4 +1,4 @@
-from flask import Flask , request ,jsonify
+from flask import Flask , request ,jsonify ,render_template
 from watson_developer_cloud import ToneAnalyzerV3
 import simplejson as json
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -96,19 +96,14 @@ def sense3():
 	mycol8 = mongo.db.complaints
 	mycol9 = mongo.db.customermls
 	mydoc8 = mycol8.find({})
-	# for y in mydoc8:
-	# 	print y['username']
-	# print("for loop k bahar")
-	# mydoc9 = mycol9.find({})
-	# for k in mydoc9 :
-	# 	print(k['username'])
 
-	# print("again for loop k bahar")
 	s1 = 0
 	s2 = 0
 	s3 = 0
 	c = 0
 	for document in mydoc8:
+		if (document['isCounted']):
+			continue
 		p = 0
 		print(document['username'])
 		print(document['asin']) 
@@ -120,7 +115,7 @@ def sense3():
 				print("final sentiment is less than 3")
 				print (mongo.db.customercomplaintanalyses.find({}),"iugiug")
 				for currentValue in mongo.db.customercomplaintanalyses.find({}):
-					print ("iugoggg")
+					
 					c1 = int(currentValue['low']['c1']) 
 					c2 = int(currentValue['low']['c2']) 
 					c3 = int(currentValue['low']['c3'])
@@ -132,17 +127,17 @@ def sense3():
 				else :
 					c3+=1
 
-				print(c1,c2,c3,';oj;oj;j;')
+				print(c1,c2,c3)
 				criteria = currentValue['_id']
 
-				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"low":{"c1":c1 , "c2":c2 , "c3" :c3 }}})
+				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"low":{"c1":str(c1) , "c2":str(c2) , "c3" :str(c3) }}})
  
 
 			elif post['finalSentiment'] > 3.0 and post['finalSentiment'] < 4.0: 
 				print("final sentiment is less than 4 > 3 ")
 				print (post['username'])
 				print (mongo.db.customercomplaintanalyses.find({}),"iugiug")
-				for currentValue in mongo.db.customercomplaintanalyses.find({}) :
+				for currentValue in mongo.db.customercomplaintanalyses.find({}):
 					c1 = int(currentValue['medium']['c1']) 
 					c2 = int(currentValue['medium']['c2']) 
 					c3 = int(currentValue['medium']['c3'])
@@ -157,7 +152,7 @@ def sense3():
 				criteria = currentValue['_id']
 
 
-				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"medium":{"c1":c1 , "c2":c2 , "c3" :c3 }}})
+				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"medium":{"c1":str(c1) , "c2":str(c2) , "c3" :str(c3) }}})
  
 
 
@@ -181,14 +176,14 @@ def sense3():
 				criteria = currentValue['_id']
 	
 
-				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"high":{"c1":c1 , "c2":c2 , "c3" :c3 }}})
+				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"high":{"c1":str(c1) , "c2":str(c2) , "c3" :str(c3) }}})
 
 
 
 
 			# mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
 			
-	return "saatvik and pulkit here , hello "
+	return "saatvik and pulkit here,hello "
 
 sched = BackgroundScheduler(daemon=True)
 sched.add_job(sense3,'interval',seconds=30)
@@ -198,7 +193,8 @@ sched.start()
 @app.route('/')
 @cross_origin()
 def hello_world():
-	return "Saatvik pulkit are best "
+	return render_template('landing.html')
+	# return "Saatvik pulkit are best "
 
 @app.route('/ibm')
 @cross_origin()

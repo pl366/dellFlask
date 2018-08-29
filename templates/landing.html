@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>
+    FLASK SERVER 
+  </title>
+  <link rel="stylesheet" href="{{ url_for('static',filename='styles/style.css') }}">
+</head>
+<body>
+<h1>FLASK SERVER</h1>
+
+<div class="gallery cf">
+  <div>
+    <img src="{{ url_for('static',filename='images/1.PNG') }}">
+  </div>
+  <div>
+    <img src="{{ url_for('static',filename='images/2.PNG') }}" />
+  </div>
+  <div>
+    <img src="{{ url_for('static',filename='images/3.PNG') }}" />
+  </div>
+  <div>
+    <img src="{{ url_for('static',filename='images/4.PNG') }}" />
+  </div>
+  <div>
+    <img src="{{ url_for('static',filename='images/5.PNG') }}" />
+  </div>
+</div>
+</body>
+</html>
