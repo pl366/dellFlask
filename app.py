@@ -90,6 +90,109 @@ sched = BackgroundScheduler(daemon=True)
 sched.add_job(sense2,'interval',hours=24)
 sched.start()
 
+def sense3():
+	print("Scheduler3 is alive!")
+
+	mycol8 = mongo.db.complaints
+	mycol9 = mongo.db.customermls
+	mydoc8 = mycol8.find({})
+	# for y in mydoc8:
+	# 	print y['username']
+	# print("for loop k bahar")
+	# mydoc9 = mycol9.find({})
+	# for k in mydoc9 :
+	# 	print(k['username'])
+
+	# print("again for loop k bahar")
+	s1 = 0
+	s2 = 0
+	s3 = 0
+	c = 0
+	for document in mydoc8:
+		p = 0
+		print(document['username'])
+		print(document['asin']) 
+		for i in document['asin']:
+			p+=int(ord(i))
+		p =p%3
+		for post in mongo.db.customermls.find({"username":{"$in": [document['username']]}}):
+			if post['finalSentiment'] < 3.0 :
+				print("final sentiment is less than 3")
+				print (mongo.db.customercomplaintanalyses.find({}),"iugiug")
+				for currentValue in mongo.db.customercomplaintanalyses.find({}):
+					print ("iugoggg")
+					c1 = int(currentValue['low']['c1']) 
+					c2 = int(currentValue['low']['c2']) 
+					c3 = int(currentValue['low']['c3'])
+ 				
+				if p == 0:
+					c1+=1
+				elif p == 1:
+					c2+=1 
+				else :
+					c3+=1
+
+				print(c1,c2,c3,';oj;oj;j;')
+				criteria = currentValue['_id']
+
+				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"low":{"c1":c1 , "c2":c2 , "c3" :c3 }}})
+ 
+
+			elif post['finalSentiment'] > 3.0 and post['finalSentiment'] < 4.0: 
+				print("final sentiment is less than 4 > 3 ")
+				print (post['username'])
+				print (mongo.db.customercomplaintanalyses.find({}),"iugiug")
+				for currentValue in mongo.db.customercomplaintanalyses.find({}) :
+					c1 = int(currentValue['medium']['c1']) 
+					c2 = int(currentValue['medium']['c2']) 
+					c3 = int(currentValue['medium']['c3'])
+
+				print (c1,c2,c3)	
+				if p == 0 :
+					c1+=1
+				elif p == 1 :
+					c2+=1 
+				else :
+					c3+=1
+				criteria = currentValue['_id']
+
+
+				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"medium":{"c1":c1 , "c2":c2 , "c3" :c3 }}})
+ 
+
+
+			else:
+				print(post['finalSentiment'] , post['username'])
+				print("final sentiment is high  ")
+				for currentValue in mongo.db.customercomplaintanalyses.find({}) :
+					print(currentValue['high'])
+					c1 = int(currentValue['high']['c1']) 
+					c2 = int(currentValue['high']['c2']) 
+					c3 = int(currentValue['high']['c3'])
+				
+				if p == 0 :
+					c1+=1
+				elif p == 1 :
+					c2+=1 
+				else :
+					c3+=1
+
+
+				criteria = currentValue['_id']
+	
+
+				mongo.db.customercomplaintanalyses.update_one({'_id': ObjectId(criteria)},{"$set": {"high":{"c1":c1 , "c2":c2 , "c3" :c3 }}})
+
+
+
+
+			# mongo.db.customermls.update_one({'username': username},{"$set": {"serviceFeedbackSentiment":finalSen,"feedbackCount" : newCount  ,"isAltered" : True }})
+			
+	return "saatvik and pulkit here , hello "
+
+sched = BackgroundScheduler(daemon=True)
+sched.add_job(sense3,'interval',seconds=30)
+sched.start()
 
 
 @app.route('/')
@@ -147,32 +250,6 @@ def ibm_score(**kwargs):
 	return response
 
 now = datetime.now()
-@app.route('/complaints')
-@cross_origin()
-def complaints_priority(**kwargs):
-	mycol2 = mongo.db.complaints
-	mydoc2 = mycol2.find({})
-	l = []
-	for d in mydoc2:
-		if d['onGoing']:
-			m = d['issuedAt']
-			print (d['username'])
-			cid = d['complaintId']
-			p = int(((now - m).total_seconds())//86400)
-			print(mongo.db.customermls.find({"username":{"$in": [d['username']]}}))
-			for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
-				print(post['username'])
-				l.append([cid,(post['finalSentiment']+p*0.2)])
-
-	print (l)				
-	l.sort(key = lambda x : x[1],reverse = True)
-	print (l)	
-	response = jsonify({'list': str(l)})
-	response.status_code = 200
-	
-	return response	
-
-
 @app.route('/customerSurvey',methods=['POST','GET'])
 @cross_origin()
 def survey(**kwargs):
@@ -383,6 +460,41 @@ def productBought(**kwargs):
 	print(k ,"K is ")
 
 	return response	
+
+@app.route('/complaints')
+@cross_origin()
+def complaints_priority(**kwargs):
+	mycol2 = mongo.db.complaints
+	mydoc2 = mycol2.find({})
+	l = []
+	for d in mydoc2:
+		if d['onGoing']:
+			m = d['issuedAt']
+			print (d['username'])
+			cid = d['complaintId']
+			p = int(((now - m).total_seconds())//86400)
+			print(mongo.db.customermls.find({"username":{"$in": [d['username']]}}))
+			for post in mongo.db.customermls.find({"username":{"$in": [d['username']]}}):
+				print(post['username'])
+				if (post['finalSentiment'])>0.4:
+					l.append([cid,(post['finalSentiment']-(p+1)*0.35)])
+					print (post['finalSentiment']-(p+1)*0.35)
+				elif (post['finalSentiment'])>3.0 and (post['finalSentiment'])<4.0:
+					l.append(l.append([cid,(post['finalSentiment']-(p+1)*0.1)]))
+					print (post['finalSentiment']-(p+1)*0.1)
+				else:
+					l.append(l.append([cid,(post['finalSentiment'])]))
+					print (post['finalSentiment'])
+
+	print (l)				
+	l.sort(key = lambda x : x[1],reverse = True)
+	print (l)	
+	response = jsonify({'list': str(l)})
+	response.status_code = 200
+	
+	return response	
+
+
 
 if __name__ == "__main__":
 	app.run()
